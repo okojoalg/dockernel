@@ -31,6 +31,12 @@ arguments.add_argument(
     "By default, empty value is used.",
     default=''
 )
+arguments.add_argument(
+    '--kernelspec_dir_path', '-p',
+    help="If you want to set kernelspec_dir_path "
+    "other than the default, you specify kernelspec_dir_path.",
+    default=''
+)
 
 
 JUPYTER_CONNECTION_FILE_TEMPLATE = '{connection_file}'
@@ -61,7 +67,7 @@ def image_digest(docker_client: docker.client.DockerClient,
 
 def install(args: Namespace) -> int:
     system_type = platform.system()
-    store_path = user_kernelspec_store(system_type)
+    store_path = user_kernelspec_store(system_type, args.kernelspec_dir_path)
     ensure_kernelspec_store_exists(store_path)
 
     argv = generate_kernelspec_argv(args.image_name, system_type)

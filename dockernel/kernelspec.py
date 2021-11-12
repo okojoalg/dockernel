@@ -6,12 +6,11 @@ Where term "kernelspec store" is used, it references the directory where
 jupyter will look for kernelspec dirs.
 """
 import json
-import string
 import os
-from typing import List, Dict, Optional
+import string
 from enum import Enum
 from pathlib import Path
-
+from typing import List, Dict, Optional
 
 KERNELSPEC_FILENAME = 'kernel.json'
 KERNELSPEC_STORE_DIRNAME = 'kernels'
@@ -30,6 +29,7 @@ class Kernelspec:
 
     Use str() on objects of this class to render the kernelspec file contents.
     """
+
     def __init__(self,
                  argv: List[str], display_name: str, language: str,
                  interrupt_mode: Optional[InterruptMode] = None,
@@ -53,13 +53,15 @@ class Kernelspec:
 
 
 # TODO: make sure windows path is expanded properly
-def user_kernelspec_store(system_type: str) -> Path:
+def user_kernelspec_store(system_type: str, kernelspec_dir_path: str = "") -> Path:
     """Return path to the place where user's kernelspecs are stored on given OS.
 
     Parameters
     ----------
     system_type
         Output of the builtin ``platform.system()``.
+    kernelspec_dir_path
+        If you want to set ``kernelspec_dir_path`` other than the default, you specify ``kernelspec_dir_path``.
     kernel_id
         Internal identifier of the kernel to instal. Should be short and
         URL-friendly. Should contain only ASCII numbers, ASCII letters, hyphen,
@@ -75,15 +77,15 @@ def user_kernelspec_store(system_type: str) -> Path:
     Path
         Path object to the per-user directory where kernelspec dirs are stored.
     """
-
-    if system_type == "Linux":
-        kernelspec_dir_path = "~/.local/share/jupyter/kernels"
-    elif system_type == "Windows":
-        kernelspec_dir_path = os.getenv("APPDATA") + r"\jupyter\kernels"
-    elif system_type == "Darwin":
-        kernelspec_dir_path = "~/Library/Jupyter/kernels"
-    else:
-        raise ValueError(f'unknown system type: {system_type}')
+    if kernelspec_dir_path == "":
+        if system_type == "Linux":
+            kernelspec_dir_path = "~/.local/share/jupyter/kernels"
+        elif system_type == "Windows":
+            kernelspec_dir_path = os.getenv("APPDATA") + r"\jupyter\kernels"
+        elif system_type == "Darwin":
+            kernelspec_dir_path = "~/Library/Jupyter/kernels"
+        else:
+            raise ValueError(f'unknown system type: {system_type}')
 
     return Path(kernelspec_dir_path).expanduser()
 
@@ -163,5 +165,5 @@ def install_kernelspec(kernelspec_dir: Path, kernelspec: Kernelspec) -> None:
         raise ValueError(f"kernelspec already exists: {kernelspec_dir}.")
 
     kernelspec_dir.mkdir()
-    kernelspec_file = kernelspec_dir/KERNELSPEC_FILENAME
+    kernelspec_file = kernelspec_dir / KERNELSPEC_FILENAME
     kernelspec_file.write_text(kernelspec.json())
